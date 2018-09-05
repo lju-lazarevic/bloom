@@ -5,7 +5,6 @@ CREATE INDEX ON :City(name);
 CREATE INDEX ON :Country(noc);
 CREATE INDEX ON :Team(name);
 CREATE INDEX ON :Event(name);
-CREATE INDEX ON :Sport(name);
 CREATE INDEX ON :Athlete(id);
 
 //Load Games and link to Cities
