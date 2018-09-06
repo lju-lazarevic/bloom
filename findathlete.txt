@@ -1,0 +1,8 @@
+Search Phrase
+Find athlete called $name1 $name2
+
+Description
+Find a person based on first and last name
+
+Cypher query
+MATCH (a:Athlete) WHERE a.name CONTAINS $name1 and a.name CONTAINS $name2 RETURN a
