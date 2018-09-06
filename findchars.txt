@@ -1,0 +1,8 @@
+Search Phrase
+Find name with $param
+
+Description
+Find athlete nodes with specified character
+
+Cypher query
+MATCH (a:Athlete) WHERE a.name CONTAINS $param RETURN a
