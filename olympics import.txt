@@ -5,60 +5,61 @@ CREATE INDEX ON :City(name);
 CREATE INDEX ON :Country(noc);
 CREATE INDEX ON :Team(name);
 CREATE INDEX ON :Event(name);
-CREATE INDEX ON :Athlete(id);
 
 //Load Games and link to Cities
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MERGE (a:Athlete {id:line.ID}) ON CREATE SET a.name = line.Name, a.sex = line.Sex;
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MERGE (g:Games {name:line.City + ' ' + line.Year}) ON CREATE SET g.year = line.Year, g.season = line.Season;
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MERGE (c:City {name:line.City});
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MERGE (cou:Country {noc:line.NOC});
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MERGE (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
-FOREACH (n IN CASE WHEN line.Medal = 'N' THEN [] ELSE [1] END | MERGE (t)-[:WON]->(m:Medal {type:line.Medal}));
+WITH t, line.Medal as medal WHERE line.Medal <> 'NA'
+MERGE (m:Medal {type:medal})
+CREATE (t)-[:WON]->(m);
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MERGE (e:Event {name:line.Event});
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MATCH (g:Games {name:line.City + ' ' + line.Year})
 MATCH (c:City {name:line.City})
 MERGE (g)-[:HELD_IN]->(c);
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (g:Games {name:line.City + ' ' + line.Year})
 MERGE (t)-[:PARTICIPATED_IN]->(g);
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (e:Event {name:line.Event})
 MERGE (t)-[:COMPETED_IN]->(e);
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MATCH (a:Athlete {id:line.ID})
 MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MERGE (a)-[:PART_OF]->(t);
 
-USING PERIODIC COMMIT 10000
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
+with line where line.Season="Winter"
 MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (cou:Country {noc:line.NOC})
 MERGE (t)-[:REPRESENTED]->(cou);
