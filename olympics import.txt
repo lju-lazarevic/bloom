@@ -3,6 +3,7 @@ CREATE INDEX ON :Athlete(name);
 CREATE INDEX ON :Games(name);
 CREATE INDEX ON :City(name);
 CREATE INDEX ON :Country(noc);
+CREATE INDEX ON :Country(name);
 CREATE INDEX ON :Team(name);
 CREATE INDEX ON :Event(name);
 
@@ -64,6 +65,9 @@ MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (cou:Country {noc:line.NOC})
 MERGE (t)-[:REPRESENTED]->(cou);
 
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloom/master/noc_regions.csv?raw=true' AS line
+MATCH (c:Country {noc:line.NOC})
+SET c.name = line.region;
 
 
 
