@@ -1,4 +1,4 @@
-CREATE INDEX ON :Athlete(id);
+CREATE CONSTRAINT ON (a:Athlete) ASSERT a.id IS UNIQUE;
 CREATE INDEX ON :Athlete(name);
 CREATE INDEX ON :Games(name);
 CREATE INDEX ON :City(name);
