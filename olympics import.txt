@@ -8,69 +8,106 @@ CREATE INDEX ON :Team(name);
 CREATE INDEX ON :Event(name);
 
 //Load Games and link to Cities
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (a:Athlete {id:line.ID}) ON CREATE SET a.name = line.Name, a.sex = line.Sex;
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MERGE (a:Athlete {id:line.ID}) ON CREATE SET a.name = line.Name, a.sex = line.Sex",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (g:Games {name:line.City + ' ' + line.Year}) ON CREATE SET g.year = line.Year, g.season = line.Season;
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MERGE (g:Games {name:line.City + ' ' + line.Year}) ON CREATE SET g.year = line.Year, g.season = line.Season",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (c:City {name:line.City});
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MERGE (c:City {name:line.City})",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (cou:Country {noc:line.NOC});
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MERGE (cou:Country {noc:line.NOC})",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MERGE (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 WITH t, line.Medal as medal WHERE line.Medal <> 'NA'
 MERGE (m:Medal {type:medal})
-CREATE (t)-[:WON]->(m);
+MERGE (t)-[:WON]->(m)",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (e:Event {name:line.Event});
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MERGE (e:Event {name:line.Event})",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (g:Games {name:line.City + ' ' + line.Year})
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MATCH (g:Games {name:line.City + ' ' + line.Year})
 MATCH (c:City {name:line.City})
-MERGE (g)-[:HELD_IN]->(c);
+MERGE (g)-[:HELD_IN]->(c)",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (g:Games {name:line.City + ' ' + line.Year})
-MERGE (t)-[:PARTICIPATED_IN]->(g);
+MERGE (t)-[:PARTICIPATED_IN]->(g)",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (e:Event {name:line.Event})
-MERGE (t)-[:COMPETED_IN]->(e);
+MERGE (t)-[:COMPETED_IN]->(e)",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (a:Athlete {id:line.ID})
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MATCH (a:Athlete {id:line.ID})
 MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
-MERGE (a)-[:PART_OF]->(t);
+MERGE (a)-[:PART_OF]->(t)",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
+WITH line WHERE line.Season='Winter'
+RETURN line",
+"MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
 MATCH (cou:Country {noc:line.NOC})
-MERGE (t)-[:REPRESENTED]->(cou);
+MERGE (t)-[:REPRESENTED]->(cou)",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloom/master/noc_regions.csv?raw=true' AS line
-MATCH (c:Country {noc:line.NOC})
-SET c.name = line.region;
+RETURN line",
+"MATCH (c:Country {noc:line.NOC})
+SET c.name = line.region",
+{batchSize:500,parallel:false});
 
+CALL apoc.periodic.iterate("
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloom/master/athlete_pagerank.csv?raw=true' AS line
-MATCH (a:Athlete {id:line.id})
-SET a.pageRank = toFloat(line.score);
-
-
+RETURN line",
+"MATCH (a:Athlete {id:line.id})
+SET a.pageRank = toFloat(line.score)",
+{batchSize:500,parallel:false});
