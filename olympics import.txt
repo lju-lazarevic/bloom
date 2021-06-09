@@ -69,6 +69,8 @@ LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloo
 MATCH (c:Country {noc:line.NOC})
 SET c.name = line.region;
 
-
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloom/master/athlete_pagerank.csv?raw=true' AS line
+MATCH (a:Athlete {id:line.id})
+SET a.pageRank = toFloat(line.score);
 
 
