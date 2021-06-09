@@ -1,3 +1,15 @@
+CREATE CONSTRAINT IF NOT EXISTS ON (a:Athlete) ASSERT a.id IS UNIQUE;
+CREATE INDEX /*IF NOT EXISTS*/ ON :Athlete(name);
+CREATE CONSTRAINT IF NOT EXISTS ON (g:Games) ASSERT g.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (c:City) ASSERT c.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (c:Country) ASSERT c.noc IS UNIQUE;
+CREATE INDEX /*IF NOT EXISTS*/ ON :Country(name);
+CREATE CONSTRAINT IF NOT EXISTS ON (t:Team) ASSERT t.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (e:Event) ASSERT e.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (m:Medal) ASSERT m.type IS UNIQUE;
+
+//Load Games and link to Cities
+
 LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
 WITH line WHERE line.Season='Winter'
 WITH distinct line.ID as ID, line.Name as Name, line.Sex as Sex
