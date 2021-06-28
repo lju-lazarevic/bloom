@@ -1,74 +1,92 @@
-CREATE INDEX ON :Athlete(id);
-CREATE INDEX ON :Athlete(name);
-CREATE INDEX ON :Games(name);
-CREATE INDEX ON :City(name);
-CREATE INDEX ON :Country(noc);
-CREATE INDEX ON :Country(name);
-CREATE INDEX ON :Team(name);
-CREATE INDEX ON :Event(name);
+CREATE CONSTRAINT IF NOT EXISTS ON (a:Athlete) ASSERT a.id IS UNIQUE;
+CREATE INDEX /*IF NOT EXISTS*/ ON :Athlete(name);
+CREATE CONSTRAINT IF NOT EXISTS ON (g:Games) ASSERT g.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (c:City) ASSERT c.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (c:Country) ASSERT c.noc IS UNIQUE;
+CREATE INDEX /*IF NOT EXISTS*/ ON :Country(name);
+CREATE CONSTRAINT IF NOT EXISTS ON (t:Team) ASSERT t.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (e:Event) ASSERT e.name IS UNIQUE;
+CREATE CONSTRAINT IF NOT EXISTS ON (m:Medal) ASSERT m.type IS UNIQUE;
 
 //Load Games and link to Cities
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (a:Athlete {id:line.ID}) ON CREATE SET a.name = line.Name, a.sex = line.Sex;
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (g:Games {name:line.City + ' ' + line.Year}) ON CREATE SET g.year = line.Year, g.season = line.Season;
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.ID as ID, line.Name as Name, line.Sex as Sex
+MERGE (a:Athlete {id:ID}) ON CREATE SET a.name = Name, a.sex = Sex;
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (c:City {name:line.City});
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.City as City, line.Year as Year, line.Season as Season
+MERGE (g:Games {name:City + ' ' + Year}) 
+ON CREATE SET g.year = Year, g.season = Season;
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (cou:Country {noc:line.NOC});
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.City as City
+MERGE (c:City {name:City});
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
-WITH t, line.Medal as medal WHERE line.Medal <> 'NA'
-MERGE (m:Medal {type:medal})
-CREATE (t)-[:WON]->(m);
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.NOC as NOC
+MERGE (cou:Country {noc:NOC});
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MERGE (e:Event {name:line.Event});
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.Team as Team, line.Event as Event, line.Year as Year, line.Medal as Medal
+MERGE (t:Team {name:Team + ' ' + Event + ' ' + Year})
+WITH t, Medal WHERE Medal <> 'NA'
+MERGE (m:Medal {type:Medal})
+MERGE (t)-[:WON]->(m);
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (g:Games {name:line.City + ' ' + line.Year})
-MATCH (c:City {name:line.City})
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.Event as Event
+MERGE (e:Event {name:Event});
+
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.City as City, line.Year as Year
+MATCH (g:Games {name:City + ' ' + Year})
+MATCH (c:City {name:City})
 MERGE (g)-[:HELD_IN]->(c);
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
-MATCH (g:Games {name:line.City + ' ' + line.Year})
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.Team as Team, line.Event as Event, line.Year as Year,line.City as City
+MATCH (t:Team {name:Team + ' ' + Event + ' ' + Year})
+MATCH (g:Games {name:City + ' ' + Year})
 MERGE (t)-[:PARTICIPATED_IN]->(g);
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
-MATCH (e:Event {name:line.Event})
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.Team as Team, line.Event as Event, line.Year as Year
+MATCH (t:Team {name:Team + ' ' + Event + ' ' + Year})
+MATCH (e:Event {name:Event})
 MERGE (t)-[:COMPETED_IN]->(e);
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (a:Athlete {id:line.ID})
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
+
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.ID as ID, line.Event as Event, line.Year as Year, line.Team as Team
+MATCH (a:Athlete {id:ID})
+MATCH (t:Team {name:Team + ' ' + Event + ' ' + Year})
 MERGE (a)-[:PART_OF]->(t);
 
-LOAD CSV WITH HEADERS FROM 'https://github.com/lju-lazarevic/bloom/blob/master/athlete_events.csv?raw=true' AS line
-with line where line.Season="Winter"
-MATCH (t:Team {name:line.Team + ' ' + line.Event + ' ' + line.Year})
-MATCH (cou:Country {noc:line.NOC})
+LOAD CSV WITH HEADERS FROM 'https://rawcdn.githack.com/lju-lazarevic/bloom/c347841ba8474c84d2e0eb7186a5fbad036d1ca6/athlete_events.csv' AS line
+WITH line WHERE line.Season='Winter'
+WITH distinct line.Team as Team, line.Event as Event, line.Year as Year, line.NOC as NOC
+MATCH (t:Team {name:Team + ' ' + Event + ' ' + Year})
+MATCH (cou:Country {noc:NOC})
 MERGE (t)-[:REPRESENTED]->(cou);
 
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloom/master/noc_regions.csv?raw=true' AS line
-MATCH (c:Country {noc:line.NOC})
-SET c.name = line.region;
+WITH distinct line.NOC as NOC, line.region as region 
+MATCH (c:Country {noc:NOC})
+SET c.name = region;
 
-
-
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/lju-lazarevic/bloom/master/athlete_pagerank.csv?raw=true' AS line
+WITH distinct line.id as id, line.score as score
+MATCH (a:Athlete {id:id})
+SET a.pageRank = toFloat(score);
 
