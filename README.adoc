@@ -143,5 +143,5 @@ Using the dynamic sizing option, use the smallest and largest node sizes possibl
 .Click to see solution
 [%collapsible]
 ====
-Paul Accola is the 'most connected' athlete, with a Page Rank score of 3.91
+Samuel Bode Miller is the 'most connected' athlete, with a Page Rank score of 4.82
 ====
