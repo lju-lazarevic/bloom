@@ -1,0 +1,147 @@
+= Hands on Introduction to Neo4j Bloom
+
+_This is the brief write-up for the Introduction to Bloom training session held on 9th June 2021. You can watch a recording of the session https://neo4j.brand.live/c/2021nodes-training-wednesday[here^]. Alternatively, you should be able to follow along using the repo as well._
+
+Other useful links: 
+
+* https://neo4j.com/docs/bloom-user-guide/current/[Neo4j Bloom documentation^]
+* https://neo4j.com/developer/neo4j-bloom/[Neo4j Bloom developer guide^]
+
+== Data set for Bloom training
+We use the Kaggle Olympics Data Set for this example. Specifically, the dataset contains information from the https://www.kaggle.com/heesoo37/120-years-of-olympic-history-athletes-and-results[Summer and Winter Olympics from 1896 to 2016^]. 
+
+Due to the limitations in https://dev.neo4j.com/aura-landing[Neo4j Aura Free^] tier on the number of nodes and relationships permitted, we are only using the Winter Games dataset. Not using Neo4j Aura Free? Feel free to remove the 'winter' filter to access the full data set.
+
+.Data model for Olympic data set
+image::img\datamodel_olympics.jpg[Data Model]
+
+== Setting up the database
+
+You have a choice of databases, including:
+
+* Neo4j Aura (including free tier)
+* Neo4j Sandbox
+* Neo4j Desktop
+* etc.
+
+*For Neo4j Aura Free:*
+
+* https://dev.neo4j.com/aura-login[Sign in^] & click “Create a database”
+* Give your database a name
+* Selected “Shared” database size
+* Click “Create Database”
+* Make a copy of the generated password - keep it safe!
+
+*For Neo4j Sandbox:*
+
+* https://dev.neo4j.com/try[Sign in^] & click “Blank sandbox”
+
+*What's the difference between Aura and Sandbox?*
+
+Neo4j Sandbox is a time-limited instance of the Neo4j database, it lasts for a maximum of 10 days (when extended, otherwise three days without extension), whereas Neo4j Aura free is free for life.
+
+== Loading the data
+
+* Copy all the queries from https://dev.neo4j.com/bloom-training-1[here^]
+* Click on open/Neo4j Browser to start the Browser
+* Username: neo4j
+* Paste the query into the query window and press the play button to start
+
+New to Neo4j Browser? Check out this https://neo4j.com/developer/neo4j-browser/[developer guide^].
+
+== Your turn - create a perspective for the data set
+
+Start the Bloom App. You will be prompted to auto-generate a perspective.
+
+Explore the auto-generated perspective:
+
+* What categories have been loaded?
+* What category properties have been selected to display?
+
+Try creating your own perspective:
+
+* Click on ‘Choose a Perspective’ --> ’Create a Perspective’
+* Add the categories
+* Select properties to display
+* Switch back to the auto-generated perspective
+
+== Your turn - tell me more about...
+
+Look up *Maxime Dufour-Lapointe*:
+
+* Explore the information about Maxime Dufour-Lapointe using the Card List
+* Try right-clicking the node and expand
+* What more do we learn about Maxime Dufour-Lapointe?
+* Expanding the Team node (cross-check the colour with the Category list on the right), what more do we learn?
+
+*Solutions*
+
+.Click to see solution
+[%collapsible]
+====
+Maxime Dufour-Lapointe was part of the Canada Freestyle Skiing team, and competed with her siblings Chlo Dufour-Lapointe and Justine Dufour-Lapointe!
+====
+
+== Your turn - mind the gap
+How would you find the answer to:
+What Olympic games was *Yelena Dubok* a part of?
+
+* How many different patterns can you come up with that provide the answer?
+
+.Click to see solution
+[%collapsible]
+====
+Lots of different ways, including
+
+* Yelena Dubok team games
+* Yelena Dubok part of competed
+* Yelena Dubok team competed in
+* Yelena Dubok part of team competed 
+* etc.
+====
+
+== Your turn - time to answer some questions!
+
+* How many Gold medals has *Claudia Pechstein* won?
+* How many teams has *Lamine Guye* been in?
+* Can you find some athletes that have represented more than one country?
+* What different ways are *Olivier Jenot* and *Patrice Servelle* linked? (hint: think about the paths that may link them)
+
+.Click to see solution
+[%collapsible]
+====
+* *Claudia Pechstein* has won 8 Gold medals
+* *Lamine Guye* has been in 8 teams
+* *Country Team Athlete Team Country* helps us find athletes who have represented more than one country
+* *Olivier Jenot* and *Patrice Servelle* linked through same games (Torino and Sochi) and country (Monaco) 
+====
+
+== Your turn - creating search phrases
+Wouldn’t it be nice to find Athletes without knowing their middle names? Let’s add a search phrase for that!
+
+Add search phrases to find names
+
+* Cypher code from https://dev.neo4j.com/bloom-training-2[here^]
+* Test out your search phrases!
+
+== Your turn - where are those cities?
+
+* Add a relationship between City and Country for Cities that have held the Olympics more than once
+* Feel free to search the City locations if you don’t know them off hand!
+
+== Your turn - who’s the most connected athlete?
+
+We are going to use the Page Rank scores we have on Athlete to Athlete, based on shared Teams. 
+
+First of all, why not add some appropriate icons for all the nodes in use?
+
+Using the dynamic sizing option, use the smallest and largest node sizes possible. The following range values may be useful:
+
+* Min value: 0.15
+* Max value: 4.85
+
+.Click to see solution
+[%collapsible]
+====
+Paul Accola is the 'most connected' athlete, with a Page Rank score of 3.91
+====
